@@ -27,6 +27,49 @@ class Controller{
         }
     }
 
+    static async login(req, res, next) {
+        try {
+          const { email, password } = req.body;
+    
+          let findUser = await User.findOne({
+            where: {
+              email: email,
+            },
+          });
+          if (!findUser) {
+            throw {
+              name: "Unauthorized",
+              code: 401,
+              msg: `Invalid email or password`,
+            };
+          }
+    
+          const checkPassword = comparePassword(password, findUser.password);
+          if (!checkPassword) {
+            throw {
+              name: "Unauthorized",
+              code: 401,
+              msg: `Invalid email or password`,
+            };
+          }
+    
+          const payload = {
+            id: findUser.id,
+            email: findUser.email,
+          };
+    
+          const access_token = generateToken(payload);
+    
+          res.status(200).json({
+            id: findUser.id,
+            role: findUser.role,
+            access_token: access_token,
+            email: findUser.email
+          });
+        } catch (err) {
+            console.log(err);
+        }
+      }
 
 
 }
