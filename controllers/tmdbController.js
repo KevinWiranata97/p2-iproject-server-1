@@ -1,6 +1,7 @@
 const axios = require("axios");
 const token = process.env.API_TOKEN;
 const api_key = process.env.API_KEY;
+const snap = require('../helpers/midtrans')
 
 class Controller {
   static async getPopular(req, res) {
@@ -106,6 +107,28 @@ class Controller {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+
+  static async payment(req, res, next) {
+    try {
+        let parameter = {
+            transaction_details: {
+                order_id: Math.floor(Math.random() * 100000),
+                gross_amount: 35000
+            }, credit_card:{
+                secure : true
+            }
+        };
+
+        const transaction = await snap.createTransaction(parameter)
+        console.log(transaction);
+        res.status(201).json({
+            token: transaction.token,
+            redirect_url: transaction.redirect_url
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
 }
 
 module.exports = Controller;
