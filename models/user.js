@@ -2,7 +2,7 @@
 const {
   Model
 } = require('sequelize');
-
+const nodemailer = require('nodemailer')
 const {hashPassword} = require('../helpers/bcrypt')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
@@ -34,7 +34,36 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty:{msg:'password is required'},
       }
     }
-  }, {
+  }, { hooks: {
+    afterCreate: (newUser =>{
+      let transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth:{
+          user:"tokomobilidaman@gmail.com",
+          pass:"@ayobelimobil"
+        }
+      })
+      
+      let mailOptions = {
+        from: "tokomobilidaman@gmail.com",
+        to: `${newUser.email}`,
+        subject: "Registration successfull",
+        text: 
+        `Thanks for joining Movlix, ${newUser.email}.`
+        
+      }
+      
+      transporter.sendMail(mailOptions, function(err,succes){
+        if(err){
+          console.log(err);
+        } else{
+          console.log("Email is sent");
+        }
+      })
+    })
+   
+      
+  },
     sequelize,
     modelName: 'User',
   });
